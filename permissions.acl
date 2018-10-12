@@ -12,40 +12,219 @@
  * limitations under the License.
  */
 
-/**
- * Sample access control list.
- */
-rule EverybodyCanReadEverything {
-    description: "Allow all participants read access to all resources"
-    participant: "org.example.kycdemo.*"
-    operation: READ
-    resource: "org.example.kycdemo.*"
-    action: ALLOW
+rule ParticipantsSeeSelves {
+  	description: "Let participants see themselves"
+  	participant(p): "org.hyperledger.composer.system.Participant"
+  	operation: ALL
+    resource(r): "org.hyperledger.composer.system.Participant"
+  	condition: (r.getIdentifier() == p.getIdentifier())
+  	action: ALLOW
 }
 
-rule EverybodyCanSubmitTransactions {
-    description: "Allow all participants to submit transactions"
-    participant: "org.example.kycdemo.centralAuthority"
-    operation: CREATE
-    resource: "org.example.kycdemo.*"
-    action: ALLOW
+rule ParticipantsSeeBanks {
+  	description: "Let participants see themselves"
+  	participant: "org.hyperledger.composer.system.Participant"
+  	operation: READ
+    resource: "org.example.kycdemo.Bank"
+  	action: ALLOW
 }
 
-rule OwnerHasFullAccessToTheirAssets {
-    description: "Allow all participants full access to their assets"
-    participant(p): "org.example.kycdemo.centralAuthority"
-    operation: ALL
-    resource(r): "org.example.kycdemo.*"
-    condition: (r.owner.getIdentifier() === p.getIdentifier())
-    action: ALLOW
+// rule SeeOtherCustomers {
+// 	  description: "Let Customers see other Customers"
+//   	participant: "org.example.kycdemo.Customer"
+//   	operation: READ
+//     resource: "org.example.kycdemo.Customer"
+//   	action: ALLOW
+// }
+
+// rule CustomerSeeBankEmployee {
+// 	  description: "Let Customers see their BankEmployees"
+//   	participant(p): "org.example.kycdemo.Customer"
+//   	operation: READ
+//     resource(r): "org.example.kycdemo.BankEmployee"
+//   	condition: (r.bank.getIdentifier() == p.bank.getIdentifier())
+//   	action: ALLOW
+// }
+
+rule BankEmployeeSeeCustomer {
+	  description: "Let BankEmployees see their Customers"
+  	participant(p): "org.example.kycdemo.BankEmployee"
+  	operation: READ
+    resource(r): "org.example.kycdemo.Customer"
+  	condition: (r.bank.getIdentifier() == p.bank.getIdentifier())
+  	action: ALLOW
 }
 
-rule SystemACL {
-  description:  "System ACL to permit all access"
-  participant: "org.hyperledger.composer.system.Participant"
-  operation: ALL
-  resource: "org.hyperledger.composer.system.**"
-  action: ALLOW
+rule BankEmployeeSeeBankEmployee {
+	  description: "Let BankEmployees see their colleagues"
+  	participant(p): "org.example.kycdemo.BankEmployee"
+  	operation: READ
+    resource(r): "org.example.kycdemo.BankEmployee"
+  	condition: (r.bank.getIdentifier() == p.bank.getIdentifier())
+  	action: ALLOW
+}
+
+rule CustomerMakeApplication {
+	  description: "All customers can submit an InitialApplication transaction"
+  	participant: "org.example.kycdemo.Customer"
+  	operation: CREATE
+    resource: "org.example.kycdemo.InitialApplication"
+  	action: ALLOW
+}
+
+rule CustomerViewKYCRequest {
+	  description: "All customers can view request for KYC they are involved with"
+  	// participant(p): "org.example.kycdemo.Customer"
+    participant: "org.example.kycdemo.Customer"
+  	operation: READ
+    // resource(r): "org.example.kycdemo.KYCRequest"
+    resource: "org.example.kycdemo.KYCRequest"
+    action: ALLOW
+    // condition: (p.getIdentifier() === r.applicant.getIdentifier() || p.getIdentifier() === r.beneficiary.getIdentifier())
+}
+
+
+rule BankEmployeeViewKYCRequest {
+	  description: "All bank employees can view request for KYC their bank is involved with"
+  	participant(p): "org.example.kycdemo.BankEmployee"
+  	operation: READ
+    resource(r): "org.example.kycdemo.KYCRequest"
+    condition: (p.bank.getIdentifier() === r.issuingBank.getIdentifier() || p.bank.getIdentifier() === r.exportingBank.getIdentifier())
+  	action: ALLOW
+}
+
+// rule CustomerApproveApplication {
+// 	  description: "All customers can submit an Approve transaction for an LoC they are involved with"
+//   	participant(p): "org.example.kycdemo.Customer"
+//   	operation: CREATE
+//     resource(r): "org.example.kycdemo.Approve"
+//     condition: (p.getIdentifier() === r.loc.applicant.getIdentifier() || p.getIdentifier() === r.loc.beneficiary.getIdentifier())
+//   	action: ALLOW
+// }
+
+// rule BankEmployeeApproveApplication {
+// 	  description: "All bank employees can submit an Approve transaction for an LoC their bank is involved with"
+//   	participant(p): "org.example.kycdemo.BankEmployee"
+//   	operation: CREATE
+//     resource(r): "org.example.kycdemo.Approve"
+//     condition: (p.bank.getIdentifier() === r.loc.issuingBank.getIdentifier() || p.bank.getIdentifier() === r.loc.exportingBank.getIdentifier())
+//   	action: ALLOW
+// }
+
+// rule CustomerAddApproval {
+// 	  description: "All customers can add their approval to a request for KYC they are involved with"
+//   	participant(p): "org.example.kycdemo.Customer"
+//   	operation: UPDATE
+//     resource(r): "org.example.kycdemo.KYCRequest"
+//   	transaction(t): "org.example.kycdemo.Approve"
+//     condition: (p.getIdentifier() === r.applicant.getIdentifier() || p.getIdentifier() === r.beneficiary.getIdentifier())
+//   	action: ALLOW
+// }
+
+rule BankEmployeeAddApproval {
+	  description: "All bank employee can add their approval to a request for KYC their bank is involved with"
+  	participant(p): "org.example.kycdemo.BankEmployee"
+  	operation: UPDATE
+    resource(r): "org.example.kycdemo.KYCRequest"
+  	transaction(t): "org.example.kycdemo.Approve"
+    condition: (p.bank.getIdentifier() === r.issuingBank.getIdentifier() || p.bank.getIdentifier() === r.exportingBank.getIdentifier())
+  	action: ALLOW
+}
+
+// rule CustomerSubmitSuggestChanges {
+// 	  description: "All customers can submit a SuggestChanges transaction to a request for KYC they are involved with"
+//   	participant(p): "org.example.kycdemo.Customer"
+//   	operation: CREATE
+//     resource(r): "org.example.kycdemo.SuggestChanges"
+//     condition: (p.getIdentifier() === r.loc.applicant.getIdentifier() || p.getIdentifier() === r.loc.beneficiary.getIdentifier())
+//   	action: ALLOW
+// }
+
+rule BankEmployeeSubmitSuggestChanges {
+	  description: "All bank employees can submit a SuggestChanges transaction to a request for KYC their bank is involved with"
+  	participant(p): "org.example.kycdemo.BankEmployee"
+  	operation: CREATE
+    resource(r): "org.example.kycdemo.SuggestChanges"
+    condition: (p.bank.getIdentifier() === r.loc.issuingBank.getIdentifier() || p.bank.getIdentifier() === r.loc.exportingBank.getIdentifier())
+  	action: ALLOW
+}
+
+rule CustomerSuggestChanges {
+	  description: "All customers can submit a SuggestChanges transaction to a request for KYC they are involved with"
+  	participant(p): "org.example.kycdemo.Customer"
+  	operation: UPDATE
+    resource(r): "org.example.kycdemo.KYCRequest"
+  	transaction(t): "org.example.kycdemo.SuggestChanges"
+    condition: (p.getIdentifier() === r.applicant.getIdentifier() || p.getIdentifier() === r.beneficiary.getIdentifier())
+  	action: ALLOW
+}
+
+rule BankEmployeeSuggestChanges {
+	  description: "All bank employee can add their approval to a request for KYC their bank is involved with"
+  	participant(p): "org.example.kycdemo.BankEmployee"
+  	operation: UPDATE
+    resource(r): "org.example.kycdemo.KYCRequest"
+  	transaction(t): "org.example.kycdemo.SuggestChanges"
+    condition: (p.bank.getIdentifier() === r.issuingBank.getIdentifier() || p.bank.getIdentifier() === r.exportingBank.getIdentifier())
+  	action: ALLOW
+}
+
+rule CustomerAddChanges {
+	  description: "All customers can update a KYCRequest with their suggested rules if they are involved in it"
+  	participant(p): "org.example.kycdemo.Customer"
+  	operation: UPDATE
+    resource(r): "org.example.kycdemo.KYCRequest"
+  	transaction(t): "org.example.kycdemo.SuggestChanges"
+    condition: (p.getIdentifier() === r.applicant.getIdentifier() || p.getIdentifier() === r.beneficiary.getIdentifier())
+  	action: ALLOW
+}
+
+rule BankEmployeeAddChanges {
+	  description: "All bank employees can update a KYCRequest with their suggested rules if their bank is involved in it"
+  	participant(p): "org.example.kycdemo.Customer"
+  	operation: UPDATE
+    resource(r): "org.example.kycdemo.KYCRequest"
+  	transaction(t): "org.example.kycdemo.SuggestChanges"
+    condition: (p.bank.getIdentifier() === r.issuingBank.getIdentifier() || p.bank.getIdentifier() === r.exportingBank.getIdentifier())
+  	action: ALLOW
+}
+
+// rule CustomerRejectApplication {
+// 	  description: "All customers can submit a Reject transaction for an LoC they are involved with"
+//   	participant(p): "org.example.kycdemo.Customer"
+//   	operation: CREATE
+//     resource(r): "org.example.kycdemo.Reject"
+//     condition: (p.getIdentifier() === r.loc.applicant.getIdentifier() || p.getIdentifier() === r.loc.beneficiary.getIdentifier())
+//   	action: ALLOW
+// }
+
+rule BankEmployeeRejectApplication {
+	  description: "All bank employees can submit a Reject transaction for an LoC their bank is involved with"
+  	participant(p): "org.example.kycdemo.BankEmployee"
+  	operation: CREATE
+    resource(r): "org.example.kycdemo.Reject"
+    condition: (p.bank.getIdentifier() === r.loc.issuingBank.getIdentifier() || p.bank.getIdentifier() === r.loc.exportingBank.getIdentifier())
+  	action: ALLOW
+}
+
+// rule CustomerMarksAsRejected {
+// 	  description: "All customers can update a KYCRequest they are involved with with a REJECTED status"
+//   	participant(p): "org.example.kycdemo.Customer"
+//   	operation: UPDATE
+//     resource(r): "org.example.kycdemo.KYCRequest"
+//   	transaction(t): "org.example.kycdemo.Reject"
+//     condition: (p.getIdentifier() === r.applicant.getIdentifier() || p.getIdentifier() === r.beneficiary.getIdentifier())
+//   	action: ALLOW
+// }
+
+rule BankEmployeeMarksAsRejected {
+	  description: "All bank employees can update a KYCRequest their bank is involved with with a REJECTED status"
+  	participant(p): "org.example.kycdemo.BankEmployee"
+  	operation: UPDATE
+    resource(r): "org.example.kycdemo.KYCRequest"
+  	transaction(t): "org.example.kycdemo.Reject"
+    condition: (p.bank.getIdentifier() === r.issuingBank.getIdentifier() || p.bank.getIdentifier() === r.exportingBank.getIdentifier())
+  	action: ALLOW
 }
 
 rule NetworkAdminUser {
@@ -56,9 +235,9 @@ rule NetworkAdminUser {
     action: ALLOW
 }
 
-rule NetworkAdminSystem {
-    description: "Grant business network administrators full access to system resources"
-    participant: "org.hyperledger.composer.system.NetworkAdmin"
+rule System {
+    description: "Grant all full access to system resources"
+    participant: "org.**"
     operation: ALL
     resource: "org.hyperledger.composer.system.**"
     action: ALLOW

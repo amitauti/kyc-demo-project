@@ -11,70 +11,114 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
-/**
- * Write your model definitions here
- */
-
+ 
 namespace org.example.kycdemo
 
-participant centralAuthority identified by centralAuthotiyId {
-  o String centralAuthotiyId
-  o String centralAuthorityName
-} 
-
-participant identityConsumers identified by consumerId {
-  o String consumerId
-  o String consumerName
+// ENUMS
+enum KYCStatus {
+  o AWAITING_APPROVAL
+  o APPROVED
+  o CLOSED
+  o REJECTED
 }
 
-asset customerInformation identified by customerKycId {
-  o String customerKycId
-  --> centralAuthority owner
-  o String customerName
-  o String customerCategory
+// ASSETS
+asset KYCRequest identified by kycRequestId {
+  o String kycRequestId
+  --> Customer applicant
+  --> Bank issuingBank
+  o Rule[] rules
+  o String [] evidence
+  --> Person [] approval
+  o KYCStatus status
+  o String closeReason optional
 }
 
-transaction confirmIdentity {
-  --> customerInformation identity
-  o Integer newCustomerIdentity 
+// PARTICIPANTS
+participant Bank identified by bankID {
+  o String bankID
+  o String name
 }
 
-transaction confirmAddress {
-  --> customerInformation address
-  o Integer newCustomerAddress
+abstract participant Person identified by personId {
+  o String personId
+  o String name
+  o String lastName optional
+  --> Bank bank
 }
 
-event confirmIdentityEvent {
-  --> customerInformation identity
-  o Integer howManyIdsBefore
-  o Integer howManyIdsNow
+participant Customer extends Person {
+  o String companyName
 }
 
-event confirmIAddressEvent {
-  --> customerInformation Address
-  o Integer howManyAdrsBefore
-  o Integer howManyAdrsNow
+participant BankEmployee extends Person {
 }
-// participant SampleParticipant identified by participantId {
-//   o String participantId
-//   o String firstName
-//   o String lastName
-// }
 
-// asset SampleAsset identified by assetId {
-//   o String assetId
-//   --> SampleParticipant owner
-//   o String value
-// }
+// CONCEPTS
+concept Rule {
+  o String ruleId
+  o String ruleText
+}
 
-// transaction SampleTransaction {
-//   --> SampleAsset asset
-//   o String newValue
-// }
+concept ProductDetails {
+  o String productType
+}
 
-// event SampleEvent {
-//   --> SampleAsset asset
-//   o String oldValue
-//   o String newValue
-// }
+// TRANSACTIONS + EVENTS
+transaction InitialApplication {
+  o String kycRequestId
+  --> Customer applicant
+  --> Customer beneficiary
+  o Rule[] rules
+  o ProductDetails productDetails
+}
+
+event InitialApplicationEvent {
+  --> KYCRequest kyc
+}
+
+transaction Approve {
+  --> KYCRequest kyc
+  --> Person approvingParty
+}
+
+event ApproveEvent {
+  --> KYCRequest kyc
+  --> Person approvingParty
+}
+
+transaction Reject {
+  --> KYCRequest kyc
+  o String closeReason
+}
+
+event RejectEvent {
+  --> KYCRequest kyc
+  o String closeReason
+}
+
+transaction SuggestChanges {
+  --> KYCRequest kyc
+  o Rule[] rules
+  --> Person suggestingParty
+}
+
+event SuggestChangesEvent {
+  --> KYCRequest kyc
+  o Rule[] rules
+  --> Person suggestingParty
+}
+
+transaction Close {
+  --> KYCRequest kyc
+  o String closeReason
+}
+
+event CloseEvent {
+  --> KYCRequest kyc
+  o String closeReason
+}
+
+// TRANSACTIONS FOR SETUP
+transaction CreateDemoParticipants {
+}
