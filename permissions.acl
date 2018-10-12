@@ -55,6 +55,14 @@ rule CustomerMakeApplication {
   	action: ALLOW
 }
 
+rule CustomerMakeKYCRequest {
+	  description: "All customers can submit an InitialApplication transaction"
+  	participant: "org.example.kycdemo.Customer"
+  	operation: CREATE
+    resource: "org.example.kycdemo.KYCRequest"
+  	action: ALLOW
+}
+
 rule CustomerViewKYCRequest {
 	  description: "All customers can view request for KYC they are involved with"
     participant: "org.example.kycdemo.Customer"
@@ -62,7 +70,6 @@ rule CustomerViewKYCRequest {
     resource: "org.example.kycdemo.KYCRequest"
     action: ALLOW
 }
-
 
 rule BankEmployeeViewKYCRequest {
 	  description: "All bank employees can view request for KYC their bank is involved with"

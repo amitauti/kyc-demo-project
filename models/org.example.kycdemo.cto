@@ -27,9 +27,9 @@ asset KYCRequest identified by kycRequestId {
   o String kycRequestId
   --> Customer applicant
   --> Bank issuingBank
-  o Rule[] rules
+  // o Rule[] rules
   o String [] evidence
-  --> Person [] approval
+  --> BankEmployee [] approval
   o KYCStatus status
   o String closeReason optional
 }
@@ -55,10 +55,10 @@ participant BankEmployee extends Person {
 }
 
 // CONCEPTS
-concept Rule {
-  o String ruleId
-  o String ruleText
-}
+// concept Rule {
+//   o String ruleId
+//   o String ruleText
+// }
 
 concept ProductDetails {
   o String productType
@@ -68,8 +68,8 @@ concept ProductDetails {
 transaction InitialApplication {
   o String kycRequestId
   --> Customer applicant
-  --> Customer beneficiary
-  o Rule[] rules
+  // --> Customer beneficiary
+  // o Rule[] rules
   o ProductDetails productDetails
 }
 
@@ -99,13 +99,13 @@ event RejectEvent {
 
 transaction SuggestChanges {
   --> KYCRequest kyc
-  o Rule[] rules
+  // o Rule[] rules
   --> Person suggestingParty
 }
 
 event SuggestChangesEvent {
   --> KYCRequest kyc
-  o Rule[] rules
+  // o Rule[] rules
   --> Person suggestingParty
 }
 
