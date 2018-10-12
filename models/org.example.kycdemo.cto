@@ -18,25 +18,63 @@
 
 namespace org.example.kycdemo
 
-participant SampleParticipant identified by participantId {
-  o String participantId
-  o String firstName
-  o String lastName
+participant centralAuthority identified by centralAuthotiyId {
+  o String centralAuthotiyId
+  o String centralAuthorityName
+} 
+
+participant identityConsumers identified by consumerId {
+  o String consumerId
+  o String consumerName
 }
 
-asset SampleAsset identified by assetId {
-  o String assetId
-  --> SampleParticipant owner
-  o String value
+asset customerInformation identified by customerKycId {
+  o String customerKycId
+  --> centralAuthority owner
+  o String customerName
+  o String customerCategory
 }
 
-transaction SampleTransaction {
-  --> SampleAsset asset
-  o String newValue
+transaction confirmIdentity {
+  --> customerInformation identity
+  o Integer newCustomerIdentity 
 }
 
-event SampleEvent {
-  --> SampleAsset asset
-  o String oldValue
-  o String newValue
+transaction confirmAddress {
+  --> customerInformation address
+  o Integer newCustomerAddress
 }
+
+event confirmIdentityEvent {
+  --> customerInformation identity
+  o Integer howManyIdsBefore
+  o Integer howManyIdsNow
+}
+
+event confirmIAddressEvent {
+  --> customerInformation Address
+  o Integer howManyAdrsBefore
+  o Integer howManyAdrsNow
+}
+// participant SampleParticipant identified by participantId {
+//   o String participantId
+//   o String firstName
+//   o String lastName
+// }
+
+// asset SampleAsset identified by assetId {
+//   o String assetId
+//   --> SampleParticipant owner
+//   o String value
+// }
+
+// transaction SampleTransaction {
+//   --> SampleAsset asset
+//   o String newValue
+// }
+
+// event SampleEvent {
+//   --> SampleAsset asset
+//   o String oldValue
+//   o String newValue
+// }
