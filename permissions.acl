@@ -29,23 +29,6 @@ rule ParticipantsSeeBanks {
   	action: ALLOW
 }
 
-// rule SeeOtherCustomers {
-// 	  description: "Let Customers see other Customers"
-//   	participant: "org.example.kycdemo.Customer"
-//   	operation: READ
-//     resource: "org.example.kycdemo.Customer"
-//   	action: ALLOW
-// }
-
-// rule CustomerSeeBankEmployee {
-// 	  description: "Let Customers see their BankEmployees"
-//   	participant(p): "org.example.kycdemo.Customer"
-//   	operation: READ
-//     resource(r): "org.example.kycdemo.BankEmployee"
-//   	condition: (r.bank.getIdentifier() == p.bank.getIdentifier())
-//   	action: ALLOW
-// }
-
 rule BankEmployeeSeeCustomer {
 	  description: "Let BankEmployees see their Customers"
   	participant(p): "org.example.kycdemo.BankEmployee"
@@ -74,13 +57,10 @@ rule CustomerMakeApplication {
 
 rule CustomerViewKYCRequest {
 	  description: "All customers can view request for KYC they are involved with"
-  	// participant(p): "org.example.kycdemo.Customer"
     participant: "org.example.kycdemo.Customer"
   	operation: READ
-    // resource(r): "org.example.kycdemo.KYCRequest"
     resource: "org.example.kycdemo.KYCRequest"
     action: ALLOW
-    // condition: (p.getIdentifier() === r.applicant.getIdentifier() || p.getIdentifier() === r.beneficiary.getIdentifier())
 }
 
 
@@ -89,37 +69,9 @@ rule BankEmployeeViewKYCRequest {
   	participant(p): "org.example.kycdemo.BankEmployee"
   	operation: READ
     resource(r): "org.example.kycdemo.KYCRequest"
-    condition: (p.bank.getIdentifier() === r.issuingBank.getIdentifier() || p.bank.getIdentifier() === r.exportingBank.getIdentifier())
+    condition: (p.bank.getIdentifier() === r.issuingBank.getIdentifier())
   	action: ALLOW
 }
-
-// rule CustomerApproveApplication {
-// 	  description: "All customers can submit an Approve transaction for an LoC they are involved with"
-//   	participant(p): "org.example.kycdemo.Customer"
-//   	operation: CREATE
-//     resource(r): "org.example.kycdemo.Approve"
-//     condition: (p.getIdentifier() === r.loc.applicant.getIdentifier() || p.getIdentifier() === r.loc.beneficiary.getIdentifier())
-//   	action: ALLOW
-// }
-
-// rule BankEmployeeApproveApplication {
-// 	  description: "All bank employees can submit an Approve transaction for an LoC their bank is involved with"
-//   	participant(p): "org.example.kycdemo.BankEmployee"
-//   	operation: CREATE
-//     resource(r): "org.example.kycdemo.Approve"
-//     condition: (p.bank.getIdentifier() === r.loc.issuingBank.getIdentifier() || p.bank.getIdentifier() === r.loc.exportingBank.getIdentifier())
-//   	action: ALLOW
-// }
-
-// rule CustomerAddApproval {
-// 	  description: "All customers can add their approval to a request for KYC they are involved with"
-//   	participant(p): "org.example.kycdemo.Customer"
-//   	operation: UPDATE
-//     resource(r): "org.example.kycdemo.KYCRequest"
-//   	transaction(t): "org.example.kycdemo.Approve"
-//     condition: (p.getIdentifier() === r.applicant.getIdentifier() || p.getIdentifier() === r.beneficiary.getIdentifier())
-//   	action: ALLOW
-// }
 
 rule BankEmployeeAddApproval {
 	  description: "All bank employee can add their approval to a request for KYC their bank is involved with"
@@ -130,15 +82,6 @@ rule BankEmployeeAddApproval {
     condition: (p.bank.getIdentifier() === r.issuingBank.getIdentifier() || p.bank.getIdentifier() === r.exportingBank.getIdentifier())
   	action: ALLOW
 }
-
-// rule CustomerSubmitSuggestChanges {
-// 	  description: "All customers can submit a SuggestChanges transaction to a request for KYC they are involved with"
-//   	participant(p): "org.example.kycdemo.Customer"
-//   	operation: CREATE
-//     resource(r): "org.example.kycdemo.SuggestChanges"
-//     condition: (p.getIdentifier() === r.loc.applicant.getIdentifier() || p.getIdentifier() === r.loc.beneficiary.getIdentifier())
-//   	action: ALLOW
-// }
 
 rule BankEmployeeSubmitSuggestChanges {
 	  description: "All bank employees can submit a SuggestChanges transaction to a request for KYC their bank is involved with"
@@ -154,8 +97,8 @@ rule CustomerSuggestChanges {
   	participant(p): "org.example.kycdemo.Customer"
   	operation: UPDATE
     resource(r): "org.example.kycdemo.KYCRequest"
-  	transaction(t): "org.example.kycdemo.SuggestChanges"
-    condition: (p.getIdentifier() === r.applicant.getIdentifier() || p.getIdentifier() === r.beneficiary.getIdentifier())
+  	transaction: "org.example.kycdemo.SuggestChanges"
+    condition: (p.getIdentifier() === r.applicant.getIdentifier())
   	action: ALLOW
 }
 
@@ -189,15 +132,6 @@ rule BankEmployeeAddChanges {
   	action: ALLOW
 }
 
-// rule CustomerRejectApplication {
-// 	  description: "All customers can submit a Reject transaction for an LoC they are involved with"
-//   	participant(p): "org.example.kycdemo.Customer"
-//   	operation: CREATE
-//     resource(r): "org.example.kycdemo.Reject"
-//     condition: (p.getIdentifier() === r.loc.applicant.getIdentifier() || p.getIdentifier() === r.loc.beneficiary.getIdentifier())
-//   	action: ALLOW
-// }
-
 rule BankEmployeeRejectApplication {
 	  description: "All bank employees can submit a Reject transaction for an LoC their bank is involved with"
   	participant(p): "org.example.kycdemo.BankEmployee"
@@ -206,16 +140,6 @@ rule BankEmployeeRejectApplication {
     condition: (p.bank.getIdentifier() === r.loc.issuingBank.getIdentifier() || p.bank.getIdentifier() === r.loc.exportingBank.getIdentifier())
   	action: ALLOW
 }
-
-// rule CustomerMarksAsRejected {
-// 	  description: "All customers can update a KYCRequest they are involved with with a REJECTED status"
-//   	participant(p): "org.example.kycdemo.Customer"
-//   	operation: UPDATE
-//     resource(r): "org.example.kycdemo.KYCRequest"
-//   	transaction(t): "org.example.kycdemo.Reject"
-//     condition: (p.getIdentifier() === r.applicant.getIdentifier() || p.getIdentifier() === r.beneficiary.getIdentifier())
-//   	action: ALLOW
-// }
 
 rule BankEmployeeMarksAsRejected {
 	  description: "All bank employees can update a KYCRequest their bank is involved with with a REJECTED status"
